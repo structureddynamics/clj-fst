@@ -6,7 +6,7 @@
   :dependencies [[org.clojure/clojure "1.6.0"]
                  [org.apache.lucene/lucene-core "4.10.2"]
                  [org.apache.lucene/lucene-misc "4.10.2"]
-                 [lein-marginalia "0.8.1-SNAPSHOT"]]
+                 [lein-marginalia "0.8.0"]]
   :source-paths      ["src/clojure"]
   :java-source-paths ["src/java"]
   :target-path "target/%s"
