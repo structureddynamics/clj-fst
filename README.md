@@ -10,9 +10,9 @@ The FST produced by this application are implemented as a bytes array which make
 
 ## Installation
 
-### Using Linengen
+### Using Leiningen
 
-You can easily install `clj-fst` using Linengen. The only thing you have to do is to add Add `[clj-fst "0.1.0"]` as a dependency to your `project.clj`.
+You can easily install `clj-fst` using Leiningen. The only thing you have to do is to add Add `[clj-fst "0.1.0"]` as a dependency to your `project.clj`.
 
 Then make sure that you downloaded this dependency by running the `lein deps` command.
 
