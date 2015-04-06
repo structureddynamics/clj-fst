@@ -38,6 +38,9 @@ Here is how you can create, populate and save a FST:
 (doseq [[input output] values]
   (add! builder {input output}))
 
+;; Creating a new FST
+(def fst (create-fst! builder))
+
 ;; Save a FST on the file system
 (save! "resources/fst.srz" fst)
 ```
