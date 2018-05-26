@@ -51,24 +51,14 @@
 ;;     ;; Create a new FST builder with `:int` outputs
 ;;     (def builder (create-builder! :type :int))
 ;;
-;; Optionally, you can tell the builder to `pack` the index to make it even more compact/smaller
-;; by specifying the `:pack true` optional parameter. The default is `false`.
-;;
-;;     ;; Create a new FST builder with `:int` outputs that is packed
-;;     (def builder (create-builder! :type :char :pack true))
-;; 
 
 (defn create-builder!
   "Create a new FST builder map.
 
-  * `[type]` *(optional)*: Output type of the FST. Can be `:int` or `:char` (default)
-  * `[pack]` *(optional)*: Specify that you want to pack the index. Default is `false`"
-  [& {:keys [type pack]
-      :or {type :char
-           pack false}}]
-  {:builder (case type
-                :int (builder! type :pack pack)
-                :char (builder! type :pack pack))
+  * `[type]` *(optional)*: Output type of the FST. Can be `:int` or `:char` (default)"
+  [& {:keys [type]
+      :or {type :char}}]
+  {:builder (builder! type)
    :type type})
 
 ;; ### Populating the FST
@@ -122,13 +112,13 @@
   **Note:** if `(add!)` is used iteratively, then you have to make sure that the
             structure it iterates over has been previously sorted by the input keys."
   [builder values]
-  (let [scratch-bytes (bytes-ref)
+  (let [scratch-bytes-builder (bytes-ref-builder)
         scratch-ints (ints-ref-builder)]
     (doseq [[word index] values]      
       (case (builder :type)
           :int (do
-                 (.copyChars scratch-bytes word)
-                 (.add (builder :builder) (. Util toIntsRef scratch-bytes scratch-ints) index))
+                 (.append scratch-bytes-builder (BytesRef. word))
+                 (.add (builder :builder) (. Util toIntsRef (.get scratch-bytes-builder) scratch-ints) index))
           :char (.add (builder :builder) (. Util toUTF16 word scratch-ints) (new CharsRef index))))))
 
 ;; ### FST Creation
@@ -192,7 +182,7 @@
   * `[file]` is the file path on the file system
   * `[fst]` is the FST instance"
   [file fst]
-  (. fst save (clojure.java.io/file file)))
+  (. fst save (.toPath (clojure.java.io/file file))))
   
 (defn load!
   "Load a FST to a file on the file system
@@ -208,7 +198,7 @@
   (let [outputs (if (= output-type :int)
                   (int-outputs)
                   (char-outputs))]
-    (. FST read (clojure.java.io/file file) outputs)))
+    (. FST read (.toPath (clojure.java.io/file file)) outputs)))
 
 ;; ## Utility functions
 ;;
@@ -235,9 +225,6 @@
   * `[share-max-tail-length]` (optional): Only used if share-suffix is true. Set this to
                                           Integer.MAX_VALUE to ensure FST is fully minimal, at cost of more
                                           CPU and more RAM during building.
-  * `[pack-fst]` (optional): Pass true to create a packed FST.
-  * `[acceptrable-overhead-ratio]` (optional): How to trade speed for space when building the FST. This option
-                                               is only relevant when doPackFST is true.
   * `[allow-array-arcs]` (optional): Pass false to disable the array arc optimization while building the FST;
                                      this will make the resulting FST smaller but slower to traverse.
   * `[bytes-page-bits]` (optional): How many bits wide to make each byte[] block in the BytesStore; if you know
@@ -269,8 +256,6 @@
               share-non-singleton-nodes
               share-max-tail-length
               (int-outputs)
-              pack-fst
-              acceptable-overhead-ratio
               allow-array-arcs
               bytes-page-bits)
     (Builder. org.apache.lucene.util.fst.FST$INPUT_TYPE/BYTE4
@@ -280,8 +265,6 @@
               share-non-singleton-nodes
               share-max-tail-length
               (char-outputs)
-              pack-fst
-              acceptable-overhead-ratio
               allow-array-arcs
               bytes-page-bits)))
 
