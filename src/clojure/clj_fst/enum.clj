@@ -28,7 +28,7 @@
   "Create an enumeration of all the <input, output> tuples that
   compose the FST"
   [fst]
-  (new IntsRefFSTEnum fst))
+  (when fst (new IntsRefFSTEnum fst)))
 
 ;; ## Iterating & Searching the Enumeration
 ;;
@@ -61,18 +61,20 @@
 (defn current!
   "Returns the term of the current input of the enumeration"
   [enum]
-  (let [input-output (.current enum)
-        input (CljUtils/inputToString (.input input-output) true)
-        output (process-output (.output input-output))]
-    {:input input :output (if (vector? output) output [output])}))
+  (when enum
+    (let [input-output (.current enum)
+          input (CljUtils/inputToString (.input input-output) true)
+          output (process-output (.output input-output))]
+      {:input input :output (if (vector? output) output [output])})))
 
 (defn next!
   "Returns the term of the next input of the enumeration"
   [enum]
-  (let [input-output (.next enum)
-        input (CljUtils/inputToString (.input input-output) true)
-        output (process-output (.output input-output))]
-    {:input input :output (if (vector? output) output [output])}))
+  (when enum
+    (let [input-output (.next enum)
+          input (CljUtils/inputToString (.input input-output) true)
+          output (process-output (.output input-output))]
+      {:input input :output (if (vector? output) output [output])})))
 
 ;; ### Searching the content of a FST
 ;;
@@ -86,26 +88,29 @@
 (defn get-ceil-term!
   "Returns the smallest term that is greater or equal to the input term, nil otherwise."
   [input enum]
-  (let [input-output (.seekCeil enum (. Util toUTF16 input (ints-ref-builder)))]
-    (if input-output
-      (let [input (CljUtils/inputToString (.input input-output) true)
-            output (process-output (.output input-output))]
-        {:input input :output output}))))
+  (when (and enum input)
+    (let [input-output (.seekCeil enum (. Util toUTF16 input (ints-ref-builder)))]
+      (if input-output
+        (let [input (CljUtils/inputToString (.input input-output) true)
+              output (process-output (.output input-output))]
+          {:input input :output output})))))
 
 (defn get-floor-term!
   "Returns the biggest term that is smaller or equal to the input term, nil otherwise."
   [input enum]
-  (let [input-output (.seekFloor enum (. Util toUTF16 input (ints-ref-builder)))]
-    (if input-output
-      (let [input (CljUtils/inputToString (.input input-output) true)
-            output (process-output (.output input-output))]
-        {:input input :output (if (vector? output) output [output])}))))
+  (when (and enum input)
+    (let [input-output (.seekFloor enum (. Util toUTF16 input (ints-ref-builder)))]
+      (if input-output
+        (let [input (CljUtils/inputToString (.input input-output) true)
+              output (process-output (.output input-output))]
+          {:input input :output (if (vector? output) output [output])})))))
 
 (defn get-exact-term!
   "Returns the term if the exact input term exists, nil otherwise."
   [input enum]
-  (let [input-output (.seekExact enum (. Util toUTF16 input (ints-ref-builder)))]
-    (if input-output
-      (let [input (CljUtils/inputToString (.input input-output) true)
-            output (process-output (.output input-output))]
-        {:input input :output (if (vector? output) output [output])}))))
+  (when (and enum input)
+    (let [input-output (.seekExact enum (. Util toUTF16 input (ints-ref-builder)))]
+      (if input-output
+        (let [input (CljUtils/inputToString (.input input-output) true)
+              output (process-output (.output input-output))]
+          {:input input :output (if (vector? output) output [output])})))))
