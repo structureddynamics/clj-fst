@@ -6,7 +6,7 @@
   (let [output (if (instance? java.util.ArrayList output)
                  (into [] output)
                  [output])]
-    (->> output
+    (->> (remove nil? output)
          (map (fn [c-ref]
                 [(.toString c-ref)]))
          (apply concat)
