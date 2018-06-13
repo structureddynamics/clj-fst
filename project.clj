@@ -1,4 +1,4 @@
-(defproject clj-fst "0.1.1"
+(defproject clj-fst "0.1.2"
   :description "Finite State Transducers (FST) for Clojure"
   :url "https://github.com/structureddynamics/clj-fst"
   :license {:name "Eclipse Public License"
